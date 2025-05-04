@@ -18,7 +18,7 @@ const UserRoute = require('./route/UserRoute')
 const app = express();
 app.use(bodyPartser.json());
 
-mongoose.connect('mongodb://127.0.0.1:27017/pos_db').then(()=>{
+mongoose.connect('mongodb://127.0.0.1:27017/Ecom_db').then(()=>{
     console.log('DB connectd..')
 }).catch(e=>{
     console.log(e);
