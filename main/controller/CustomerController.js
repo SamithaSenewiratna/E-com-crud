@@ -20,8 +20,7 @@ const updateCustomer = async (req,resp) => {   // admin ,manager
         req.params.id,
         req.body,
         { 
-            new: true 
-
+            new: true ,
         } 
      );
      if(updateCustomer){
@@ -37,22 +36,46 @@ const updateCustomer = async (req,resp) => {   // admin ,manager
 const deleteCustomer = async (req,resp) => {
 
     try{
+      const deleteCustomer = await Customer.findByIdAndDelete(req.params.id);
+      if(deleteCustomer){
+        resp.status(200).json({message:"Customer Deleted Successfully",data:deleteCustomer});
+      }
+      resp.status(404).json({message:"Customer Not Found"});
+      
+    }catch(err){
+      resp.status(500).json({error:err.message});
+    }
+}
+
+
+const findCustomer = async (req,resp) => {   //admin,manager,user
+
+    try{
+      const customer = await Customer.findById(req.params.id);
+      if(customer){
+        resp.status(200).json({message:"Customer Found Successfully",data:customer});
+      }
+      resp.status(404).json({message:"Customer Not Found"});
 
     }catch(err){
       resp.status(500).json({error:err.message});
     }
 }
-const findCustomer = async (req,resp) => {
+
+
+const loadAllCustomer = async (req,resp) => { //admin,manager,use
 
     try{
+    const {searchText,page=1,size=10} = req.query;
+    const filter = searchText ? {$or:[
+        {name:{$regex:searchText,$options:'i'}},
+        {address:{$regex:searchText,$options:'i'}},
+        {email:{$regex:searchText,$options:'i'}}
+    ]} : {};
+    const customerList = await Customer.find(filter).skip((page-1)*size).limit(parseInt(size));
+    const total = await Customer.countDocuments(filter);
+    resp.status(200).json({message:"Customer List Found Successfully",data:customerList,total:total}); 
 
-    }catch(err){
-      resp.status(500).json({error:err.message});
-    }
-}
-const loadAllCustomer = async (req,resp) => {
-
-    try{
 
     }catch(err){
       resp.status(500).json({error:err.message});
@@ -61,5 +84,9 @@ const loadAllCustomer = async (req,resp) => {
 
 
 module.exports={
-
+    saveCustomer,
+    updateCustomer,
+    deleteCustomer,
+    findCustomer,
+    loadAllCustomer
 };
